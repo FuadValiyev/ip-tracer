@@ -9,3 +9,5 @@ server:
     whitelabel:
       enabled: false
     include-message: always
+
+api: "http://ip-api.com/json/"

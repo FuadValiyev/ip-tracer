@@ -2,6 +2,7 @@ package com.iptracer.service;
 
 import com.google.gson.Gson;
 import com.iptracer.model.IpInfo;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +14,9 @@ import java.net.URL;
 @Service
 public class IpService {
 
+    @Value("${api}")
+    private String url;
+
     @Cacheable("ipCache")
     public IpInfo trace(String rawInput) throws Exception {
         String ipOrDomain = normalizeInput(rawInput);
@@ -21,7 +25,7 @@ public class IpService {
             throw new IllegalArgumentException("Invalid IP address or domain name.");
         }
 
-        String apiUrl = "http://ip-api.com/json/" + ipOrDomain + "?fields=66846719";
+        String apiUrl = url + ipOrDomain + "?fields=66846719";
         HttpURLConnection conn = (HttpURLConnection) new URL(apiUrl).openConnection();
         conn.setRequestMethod("GET");
         conn.setConnectTimeout(5000);
