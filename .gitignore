@@ -1,37 +1,51 @@
-HELP.md
-.gradle
-build/
-!gradle/wrapper/gradle-wrapper.jar
-!**/src/main/**/build/
-!**/src/test/**/build/
+# Java və kompilə edilmiş fayllar
+*.class
+*.log
+*.jar
+*.war
+*.ear
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
-bin/
-!**/src/main/**/bin/
-!**/src/test/**/bin/
-
-### IntelliJ IDEA ###
-.idea
-*.iws
+# IntelliJ IDEA
+.idea/
 *.iml
-*.ipr
+*.iws
 out/
-!**/src/main/**/out/
-!**/src/test/**/out/
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
+# Maven və ya Gradle Wrapper cache
+.gradle/
+build/
+target/
 
-### VS Code ###
+# OS spesifik fayllar
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Runtime fayllar
+tmp/
+*.tmp
+
+# ENV və gizli config
+.env
+*.env
+
+# VS Code üçün
 .vscode/
+
+# Test nəticələri
+test-output/
+coverage/
+jacoco-report/
+
+# Local db faylları (əgər varsa)
+*.h2.db
+
+# Spring Boot devtools cache
+.spring-boot-devtools.properties
+
+# Linux/macOS executable fayllar
+*.swp
+*.swo
