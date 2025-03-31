@@ -1,6 +1,7 @@
 package com.iptracer.controller;
 
 import com.google.gson.Gson;
+import com.iptracer.aspect.Monitored;
 import com.iptracer.model.IpInfo;
 import com.iptracer.service.IpService;
 import jakarta.servlet.http.HttpSession;
@@ -23,6 +24,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+@Monitored
 @Controller
 public class IpController {
 
