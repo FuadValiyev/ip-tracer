@@ -107,10 +107,14 @@ public class IpController {
             return ResponseEntity.badRequest().body("No history found.".getBytes());
         }
 
-        StringBuilder csv = new StringBuilder("IP,Country,Region,City,ISP\n");
+        StringBuilder csv = new StringBuilder();
+        csv.append("IP,Country,Region,City,ZIP,Coordinates,ISP,Organization,AS,Timezone,Status,Proxy,Hosting,Mobile\n");
         for (IpInfo info : history) {
-            csv.append(String.format("%s,%s,%s,%s,%s\n",
-                    info.getQuery(), info.getCountry(), info.getRegionName(), info.getCity(), info.getIsp()));
+            csv.append(String.format("%s,%s,%s,%s,%s,\"%s,%s\",%s,%s,%s,%s,%s,%s,%s\n",
+                    info.getQuery(), info.getCountry(), info.getRegionName(), info.getCity(),
+                    info.getZip(), info.getLat(), info.getLon(), info.getIsp(),
+                    info.getOrg(), info.getAs(), info.getTimezone(),
+                    info.getStatus(), info.isProxy(), info.isHosting(), info.isMobile()));
         }
 
         HttpHeaders headers = new HttpHeaders();
@@ -122,7 +126,7 @@ public class IpController {
 
 
     @PostMapping("/batch")
-    public String batchTrace(@RequestParam("file") MultipartFile file, Model model) {
+    public String batchTrace(@RequestParam("file") MultipartFile file, Model model, HttpSession session) {
         List<IpInfo> results = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
             String line;
@@ -138,6 +142,8 @@ public class IpController {
         }
 
         model.addAttribute("batchResults", results);
+        session.setAttribute("batchResults", results);
+
         return "index";
     }
 
@@ -192,5 +198,45 @@ public class IpController {
             return ResponseEntity.internalServerError().body(("Error: " + e.getMessage()).getBytes());
         }
     }
+
+    @GetMapping("/export-batch-json")
+    public ResponseEntity<byte[]> exportBatchJson(HttpSession session) {
+        List<IpInfo> batchResults = (List<IpInfo>) session.getAttribute("batchResults");
+        if (batchResults == null || batchResults.isEmpty()) {
+            return ResponseEntity.badRequest().body("No batch results found.".getBytes());
+        }
+
+        String json = new Gson().toJson(batchResults);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentDisposition(ContentDisposition.attachment().filename("batch-results.json").build());
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        return new ResponseEntity<>(json.getBytes(StandardCharsets.UTF_8), headers, HttpStatus.OK);
+    }
+
+    @GetMapping("/export-batch-csv")
+    public ResponseEntity<byte[]> exportBatchCsv(HttpSession session) {
+        List<IpInfo> batchResults = (List<IpInfo>) session.getAttribute("batchResults");
+        if (batchResults == null || batchResults.isEmpty()) {
+            return ResponseEntity.badRequest().body("No batch results found.".getBytes());
+        }
+
+        StringBuilder csv = new StringBuilder();
+        csv.append("IP,Country,Region,City,ZIP,Coordinates,ISP,Organization,AS,Timezone,Status,Proxy,Hosting,Mobile\n");
+        for (IpInfo info : batchResults) {
+            csv.append(String.format("%s,%s,%s,%s,%s,\"%s,%s\",%s,%s,%s,%s,%s,%s,%s\n",
+                    info.getQuery(), info.getCountry(), info.getRegionName(), info.getCity(),
+                    info.getZip(), info.getLat(), info.getLon(), info.getIsp(),
+                    info.getOrg(), info.getAs(), info.getTimezone(),
+                    info.isProxy(), info.isHosting(), info.isMobile()));
+        }
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentDisposition(ContentDisposition.attachment().filename("batch-results.csv").build());
+        headers.setContentType(MediaType.TEXT_PLAIN);
+
+        return new ResponseEntity<>(csv.toString().getBytes(StandardCharsets.UTF_8), headers, HttpStatus.OK);
+    }
+
 
 }
