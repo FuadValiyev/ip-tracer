@@ -8,7 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.BufferedReader;
@@ -16,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -28,7 +32,11 @@ public class IpController {
     @GetMapping("/")
     public String index(Model model, HttpSession session) {
         List<IpInfo> history = (List<IpInfo>) session.getAttribute("history");
-        model.addAttribute("history", history);
+        if (history != null) {
+            List<IpInfo> reversed = new ArrayList<>(history);
+            Collections.reverse(reversed);
+            model.addAttribute("history", reversed);
+        }
         return "index";
     }
 
@@ -45,13 +53,16 @@ public class IpController {
             session.setAttribute("history", history);
             session.setAttribute("lastResult", info);
 
-            model.addAttribute("history", history);
+            List<IpInfo> reversed = new ArrayList<>(history);
+            Collections.reverse(reversed);
+            model.addAttribute("history", reversed);
 
         } catch (Exception e) {
             model.addAttribute("error", e.getMessage());
         }
         return "index";
     }
+
 
     @GetMapping("/clear")
     public String clearHistory(HttpSession session) {
@@ -119,7 +130,8 @@ public class IpController {
                 try {
                     IpInfo info = ipService.trace(line.trim());
                     results.add(info);
-                } catch (Exception ignored) { }
+                } catch (Exception ignored) {
+                }
             }
         } catch (IOException e) {
             model.addAttribute("error", "Failed to read file: " + e.getMessage());
@@ -130,14 +142,54 @@ public class IpController {
     }
 
 
-    @GetMapping("/api/trace")
     @ResponseBody
+    @GetMapping("/api/trace")
     public ResponseEntity<?> traceApi(@RequestParam String ip) {
         try {
             IpInfo info = ipService.trace(ip);
             return ResponseEntity.ok(info);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/export-single-json")
+    public ResponseEntity<byte[]> exportSingleJson(@RequestParam String ip) {
+        try {
+            IpInfo info = ipService.trace(ip);
+            String json = new Gson().toJson(info);
+
+            byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=ip-info.json")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(bytes);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(("Error: " + e.getMessage()).getBytes());
+        }
+    }
+
+    @GetMapping("/export-single-csv")
+    public ResponseEntity<byte[]> exportSingleCsv(@RequestParam String ip) {
+        try {
+            IpInfo info = ipService.trace(ip);
+
+            StringBuilder csv = new StringBuilder();
+            csv.append("IP,Country,Region,City,ZIP,Coordinates,ISP,Organization,AS,Timezone,Status,Proxy,Hosting,Mobile\n");
+            csv.append(String.format("%s,%s,%s,%s,%s,\"%s,%s\",%s,%s,%s,%s,%s,%s,%s",
+                    info.getQuery(), info.getCountry(), info.getRegionName(), info.getCity(),
+                    info.getZip(), info.getLat(), info.getLon(), info.getIsp(),
+                    info.getOrg(), info.getAs(), info.getTimezone(),
+                    info.isProxy(), info.isHosting(), info.isMobile()
+            ));
+
+            byte[] bytes = csv.toString().getBytes(StandardCharsets.UTF_8);
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=ip-info.csv")
+                    .contentType(MediaType.parseMediaType("text/csv"))
+                    .body(bytes);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(("Error: " + e.getMessage()).getBytes());
         }
     }
 
