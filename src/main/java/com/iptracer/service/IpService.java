@@ -14,8 +14,8 @@ import java.net.URL;
 @Service
 public class IpService {
 
-    @Value("${api}")
-    private String url;
+    @Value("${ip.api-url}")
+    private String ipApiUrl;
 
     @Cacheable("ipCache")
     public IpInfo trace(String rawInput) throws Exception {
@@ -25,7 +25,7 @@ public class IpService {
             throw new IllegalArgumentException("Invalid IP address or domain name.");
         }
 
-        String apiUrl = url + ipOrDomain + "?fields=66846719";
+        String apiUrl = ipApiUrl + ipOrDomain + "?fields=66846719";
         HttpURLConnection conn = (HttpURLConnection) new URL(apiUrl).openConnection();
         conn.setRequestMethod("GET");
         conn.setConnectTimeout(5000);
