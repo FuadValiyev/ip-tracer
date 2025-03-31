@@ -9,6 +9,7 @@ server:
     whitelabel:
       enabled: false
     include-message: always
-  port: 8008
+  port: ${PORT}
 
-api: "http://ip-api.com/json/"
+ip:
+  api-url: ${IP_API_URL}
