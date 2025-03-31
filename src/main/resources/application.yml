@@ -1,6 +1,8 @@
 spring:
   application:
     name: IP-Tracer
+  cache:
+    type: simple
 
 server:
   error:

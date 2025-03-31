@@ -19,4 +19,8 @@ public class IpInfo {
     private String org;
     private String as;
     private String query;
+    private boolean mobile;
+    private boolean proxy;
+    private boolean hosting;
+
 }

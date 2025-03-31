@@ -2,6 +2,7 @@ package com.iptracer.service;
 
 import com.google.gson.Gson;
 import com.iptracer.model.IpInfo;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
@@ -12,8 +13,13 @@ import java.net.URL;
 @Service
 public class IpService {
 
+    @Cacheable("ipCache")
     public IpInfo trace(String rawInput) throws Exception {
         String ipOrDomain = normalizeInput(rawInput);
+
+        if (!isValidInput(ipOrDomain)) {
+            throw new IllegalArgumentException("Invalid IP address or domain name.");
+        }
 
         String apiUrl = "http://ip-api.com/json/" + ipOrDomain + "?fields=66846719";
         HttpURLConnection conn = (HttpURLConnection) new URL(apiUrl).openConnection();
@@ -57,6 +63,15 @@ public class IpService {
         } catch (Exception e) {
             return input.trim().replaceFirst("^www\\.", "").replaceAll("/$", "");
         }
+    }
+
+
+    private boolean isValidInput(String input) {
+        String ipRegex = "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\\.|$)){4}$";
+        String domainRegex = "^(?!-)[A-Za-z0-9-]{1,63}(?<!-)\\.(?!-)([A-Za-z]{2,})$";
+
+        input = input.trim().toLowerCase();
+        return input.matches(ipRegex) || input.matches(domainRegex);
     }
 
 }
