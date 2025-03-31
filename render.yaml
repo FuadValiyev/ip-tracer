@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: ip-tracer
+    plan: free
+    region: frankfurt
+    runtime: docker
+    dockerContext: .
+    dockerfilePath: Dockerfile
+    envVars:
+      - key: PORT
+        value: 8080

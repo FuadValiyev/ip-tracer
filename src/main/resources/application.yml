@@ -9,5 +9,6 @@ server:
     whitelabel:
       enabled: false
     include-message: always
+  port: 8008
 
 api: "http://ip-api.com/json/"
