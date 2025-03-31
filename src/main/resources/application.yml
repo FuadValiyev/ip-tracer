@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: IP-Tracer
+
+server:
+  error:
+    whitelabel:
+      enabled: false
+    include-message: always
