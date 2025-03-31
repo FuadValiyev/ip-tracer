@@ -8,13 +8,16 @@ Get location, ISP, timezone and coordinates of any IP or domain — displayed be
 ## 🚀 Features
 
 ✅ Trace IP addresses or domain names  
-✅ Show full geolocation data (country, city, region, ISP, coordinates, timezone, etc.)  
-✅ Display result on a map using **Leaflet.js**  
-✅ Session-based search history  
-✅ 404 and 500 error pages with custom UI  
-✅ Clean UI with **Bootstrap 5**  
-✅ Favicon, Footer, and Professional branding  
-✅ Ready for export features (JSON/TXT support coming soon)
+✅ Show full geolocation data (country, city, region, ISP, ZIP, coordinates, timezone, etc.)  
+✅ Display result on map using **Leaflet.js**  
+✅ Session-based search history (auto-reversed: latest on top)  
+✅ Batch IP Trace via .txt file upload  
+✅ Export single result, history, or batch results as **JSON** or **CSV**  
+✅ Interactive "More" modal with detail view and export options  
+✅ Responsive and clean UI with **Bootstrap 5**  
+✅ Sticky footer & favicon support  
+✅ Full error handling with friendly messages  
+✅ Ready for future enhancements: DB support, login, analytics, and more
 
 ---
 
